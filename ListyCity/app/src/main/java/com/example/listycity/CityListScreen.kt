@@ -26,10 +26,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.listycity.ui.theme.ListyCityTheme
-
+import android.R.attr.onClick
 @Composable
 fun CityListScreen(
     cities: List<City>,
+    onDeleteCity: (City) -> Unit,
     onAddCity: (City) -> Unit,
     onUpdateCity: (City, City) -> Unit,
     modifier: Modifier = Modifier
@@ -40,6 +41,9 @@ fun CityListScreen(
     var selectedCity by remember { mutableStateOf<City?>(null) }
     var editedCityName by remember { mutableStateOf("") }
     var editedProvinceName by remember { mutableStateOf("") }
+    var showDeleteCityFields by remember {mutableStateOf(false)}
+    var deleteCityName by remember {mutableStateOf("")}
+    var deleteProvinceName by remember {mutableStateOf("")}
 
     Column(modifier = modifier.fillMaxSize()) {
         Row(
@@ -58,6 +62,59 @@ fun CityListScreen(
                 }
             ) {
                 Text("+")
+            }
+
+            FloatingActionButton(
+                modifier = Modifier.padding(16.dp),
+                onClick = {
+                    showDeleteCityFields = !showDeleteCityFields
+                    if (showDeleteCityFields) {
+                        selectedCity = null
+                    }
+                }
+            ) {
+                Text("-")
+            }
+        }
+        if (showDeleteCityFields) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                OutlinedTextField(
+                    value = deleteCityName,
+                    onValueChange = { deleteCityName = it },
+                    label = { Text("City") },
+                    modifier = Modifier.weight(1f)
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                OutlinedTextField(
+                    value = deleteProvinceName,
+                    onValueChange = { deleteProvinceName = it },
+                    label = { Text("Province") },
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Button(
+                    modifier = Modifier.padding(vertical = 12.dp),
+                    onClick = {
+                        if (deleteCityName.isNotBlank() && deleteProvinceName.isNotBlank()) {
+                            onDeleteCity(
+                                City(
+                                    name = deleteCityName,
+                                    province = deleteProvinceName
+                                )
+                            )
+                            showDeleteCityFields = false
+                        }
+                    }
+                ) {
+                    Text("DELETE CITY")
+                }
             }
         }
         if (showAddCityFields) {
@@ -213,7 +270,8 @@ fun CityListScreenPreview() {
                 City("Calgary", "AB")
             ),
             onAddCity = {},
-            onUpdateCity = { _, _ -> }
+            onUpdateCity = { _, _ -> },
+            onDeleteCity = {}
         )
     }
 }
